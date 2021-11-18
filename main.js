@@ -36,6 +36,9 @@
         this.speed_x = 3;
         this.board = board;
         this.direction = 1;
+        this.bounce_angle = 0;
+        this.max_bounce_angle = Math.PI / 12;
+        this.speed = 3;
 
         board.ball = this;
         this.kind = "circle";
@@ -46,8 +49,26 @@
         //Metodos de la clase Ball
         move: function(){ //Mueve la pelota
             this.x += (this.speed_x * this.direction);
-            this.y += (this.speed_y);
-            
+            this.y += (this.speed_y * this.direction);
+        },
+        get width(){
+            return this.radius * 2;
+        },
+        get height(){
+            return this.radius * 2;
+        },
+        collision: function(bar){ //Reacciona al pegar con la barra
+            var relative_intersect_y = ( bar.y + (bar.height / 2) ) - this.y;
+
+            var normalized_intersect_y = relative_intersect_y / (bar.height / 2);
+
+            this.bounce_angle = normalized_intersect_y * this.max_bounce_angle;
+
+            this.speed_y = this.speed * -Math.sin(this.bounce_angle);
+            this.speed_x = this.speed * Math.cos(this.bounce_angle);
+
+            if(this.x > (this.board.width / 2)) this.direction = -1;
+            else this.direction = 1;
         }
     }
 })();
@@ -109,13 +130,64 @@
                 draw(this.ctx, el);
             }
         },
+        check_collisions: function(){
+            for(var i = this.board.bars.length - 1; i>= 0; i--){
+                var bar = this.board.bars[i];
+                if(hit(bar, this.board.ball)){
+                    this.board.ball.collision(bar);
+                }
+            }
+        },
         play: function(){ //Metodo para controlar el dibujado (draw) y la limpieza de los objetos (clean)
             if(this.board.playing){
                 this.clean();
                 this.draw();
+                this.check_collisions();
                 this.board.ball.move();
             }
         }
+    }
+
+    function hit(a, b){
+        //Revisa si hay una colisión de a con b
+        var hit = false;
+
+        console.log("y: "+b.y);
+        console.log("x: "+b.x);
+        //Colisiones horizontales
+        /*if(parseFloat(b.y) + parseFloat(b.height) >= canvas.height){
+            //hit = true;
+        }
+        if(b.y + b.height <= canvas.height){
+            //hit = true;
+        }
+        //Colisiones verticales
+        if(b.x + b.width >= canvas.width){
+            //hit = true;
+        }
+        if(b.x + b.width <= canvas.width){
+            //hit = true;
+        }/*
+        /*if(b.x + b.width >= a.x && b.x < a.x + a.width){
+            //Colisiones verticales
+            if(b.y + b.height >= a.y && b.y < a.y + a.height){
+                hit = true;
+            }
+        }*/
+        
+        //Colisión de a con b
+        if(b.x <= a.x && b.x + b.width >= a.x + a.width){
+            if(b.y <= a.y && b.y + b.height >= a.y + a.height){
+                hit = true;
+            }
+        }
+        //Colisión de b con a
+        if(a.x <= b.x && a.x + a.width >= b.x + b.width){
+            if(a.y <= b.y && a.y + a.height >= b.y + b.height){
+                hit = true;
+            }
+        }
+        return hit;
     }
 
     //Función para saber que dibujar (rectangulo, circulo, etc);
