@@ -9,11 +9,42 @@
         canvas{
             border: solid;
         }
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        body{
+            text-align: center;
+        }
+        h1{
+            font-size: 3em;
+            font-weight: bold;
+            margin: 2.5%;
+        }
+        ul li{
+            font-weight:inherit;
+            margin: 1%;
+        }
+        .puntaje{
+            font-size: 2em;
+        }
+        .puntaje p{
+            display: inline-block;
+            margin: 2% 10%;
+        }
     </style>
 </head>
 <body>
-    <h1>Ping Pong</h1>
-    <canvas id="canvas"></canvas>
+    <div>
+        <h1>Ping Pong</h1>
+        <ul>
+            <li>Presione ESPACIO para iniciar</li>
+            <li>Jugador 1 usa W y S para moverte</li>
+            <li>Jugador 2 usa &uarr; y &darr; para moverte</li>
+        </ul>
+        <div class="puntaje"><p id="player1"></p><p id="player2"></p></div>
+        <canvas id="canvas"></canvas>
+    </div>
     <script src="main.js"></script>
 </body>
 </html>

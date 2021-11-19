@@ -69,6 +69,16 @@
 
             if(this.x > (this.board.width / 2)) this.direction = -1;
             else this.direction = 1;
+        },
+        colissionBoard: function(){ //REacciona al pegar con los bordes del board
+            var relative_intersect_y = ( this.y + (this.height / 2) ) - this.y;
+
+            var normalized_intersect_y = relative_intersect_y / (this.height / 2);
+
+            this.bounce_angle = normalized_intersect_y * this.max_bounce_angle;
+
+            this.speed_y = this.speed * -Math.sin(this.bounce_angle);
+            this.speed_x = this.speed * Math.cos(this.bounce_angle);
         }
     }
 })();
@@ -138,42 +148,60 @@
                 }
             }
         },
+        check_collisions_board: function(){
+            if(hitBoard(this.board.ball)){
+                this.board.ball.colissionBoard();
+            }
+        },
         play: function(){ //Metodo para controlar el dibujado (draw) y la limpieza de los objetos (clean)
             if(this.board.playing){
                 this.clean();
                 this.draw();
                 this.check_collisions();
+                this.check_collisions_board();
                 this.board.ball.move();
             }
         }
+    }
+
+    function hitBoard(b){
+        var hit = false;
+        
+        console.log(puntos2);
+        console.log(puntos1);
+        //Colisiones bordes del tablero
+        if(b.y < 10.0 || b.y > 390.0){
+            hit = true;
+        }
+        if(b.x < -10)
+        {
+            puntos2 = puntos2 + 1;
+            again();
+        }
+        if(b.x > 810.0){
+            puntos1 = puntos1 + 1;
+            again();
+        }
+        function again(){
+            b.x = 350;
+            b.y = 100;
+            board_view.draw();
+            board.playing = !board.playing;
+        }
+        return hit;
     }
 
     function hit(a, b){
         //Revisa si hay una colisión de a con b
         var hit = false;
 
-        console.log("y: "+b.y);
-        console.log("x: "+b.x);
         //Colisiones horizontales
-        /*if(parseFloat(b.y) + parseFloat(b.height) >= canvas.height){
-            //hit = true;
-        }
-        if(b.y + b.height <= canvas.height){
-            //hit = true;
-        }
-        //Colisiones verticales
-        if(b.x + b.width >= canvas.width){
-            //hit = true;
-        }
-        if(b.x + b.width <= canvas.width){
-            //hit = true;
-        }/*
-        /*if(b.x + b.width >= a.x && b.x < a.x + a.width){
+        if(b.x + b.width >= a.x && b.x < a.x + a.width){
             //Colisiones verticales
             if(b.y + b.height >= a.y && b.y < a.y + a.height){
                 hit = true;
             }
-        }*/
+        }
         
         //Colisión de a con b
         if(b.x <= a.x && b.x + b.width >= a.x + a.width){
@@ -213,6 +241,10 @@ var bar2 = new Bar(735, 100, 40, 100, board);
 var canvas = document.getElementById('canvas');
 var board_view = new BoardView(canvas, board);
 var ball = new Ball(350, 100, 10, board);
+var puntos1 = 0;
+var puntos2 = 0;
+var player1 = document.getElementById('player1');
+var player2 = document.getElementById('player2');
 
 //Recibimos por el document las teclas presionadas y con estás efectuamos las acciones en la pantalla (dibujamos).
 document.addEventListener("keydown", function(ev){
@@ -244,4 +276,6 @@ window.requestAnimationFrame(controller);
 function controller(){
     board_view.play();
     window.requestAnimationFrame(controller);
+    player1.innerHTML = "Jugador 1: "+puntos1
+    player2.innerHTML = "Jugador 2: "+puntos2
 }
